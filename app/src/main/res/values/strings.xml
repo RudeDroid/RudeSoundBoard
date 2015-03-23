@@ -1,0 +1,31 @@
+<resources>
+
+    <string name="app_name">RudeSoundBoard</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Barney Stinson</string>
+    
+    <string name="strShareApp">Share App</string>
+    <string name="strShareSound">Share Quote</string>
+    <string name="strContact">Contact</string>
+    <string name="strRate">Rate</string>
+    <string name="strMoreCharacters">More Characters</string>
+    <string name="strInfo">Feel Lost?</string>
+    <string name="strInfoText">This app shows the best quotes of Barney Stinson, choose the one you want to listen to by selecting it in the list hidden on the left panel. \n\nUse the buttons on the bottom control panel to PLAY and STOP the sounds, set them as Ringtones or Notifications, and SHARE them through your favourite social networks including WhatsApp. You can also use the SHUFFLE button to play a random quote. \n\nOn the menu, press CONTACT to reach us on our e-mail address in case you want to let us know any recommendation or suggestion you can come up with. Press the RATE button to visit our app site in the Google Play Market. And lastly press SHARE to recommend this app to your friends.\n\nThis app is:\nLEGEN... wait for it... DARY!!</string>
+	
+	<string name="strRingTone">Set as Ringtone</string>
+	<string name="strNotifTone">Set as Notification tone</string>
+	<string name="strErrorSaving">Error - Check your storage unit</string>
+	
+	<string name="strEmailAccount">rudedroiddevs@gmail.com</string>
+	<string name="strAppUrl">market://details?id=com.eng.barneystinson</string>
+	<string name="strRudeDroidUrl">market://search?q=pub:\"RudeDroid\"</string>
+	
+	<string name="strRecomendation">Barney Stinson Best Quotes recomendation</string>
+	<string name="strShareAppTitle">Barney Stinson Best Quotes from RudeDroid Developers</string>
+	<string name="strShareAppText">\n\nEnjoy the best quotes of Barney Stinson from How I met your mother.\n\nShare them through your favourite social networks including WhatsApp.\n\nYou will find it published on Google Play completely free.\n\nhttps://play.google.com/store/apps/details?id=com.eng.barneystinson</string>
+	<string name="strShareSoundTitle">Listen to what Barney Stinson has to tell you</string>
+	
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+	
+</resources>

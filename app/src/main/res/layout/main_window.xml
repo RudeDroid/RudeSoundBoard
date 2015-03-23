@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/barneyfondo" >
+
+    <TextView
+        android:id="@+id/txtSoundTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text=""
+        android:textColor="@color/blue_app"
+        android:textSize="@dimen/sound_title_size"
+        android:layout_margin="@dimen/main_window_general_margin" />
+
+    <RelativeLayout
+        android:id="@+id/layoutControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/main_window_general_margin" >
+
+        <ImageButton
+            android:id="@+id/btnPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/play_bt"
+            android:layout_centerVertical="true" />
+
+        <ImageButton
+            android:id="@+id/btnStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/stop_bt"
+            android:layout_toRightOf="@id/btnPlay"
+            android:layout_marginLeft="@dimen/controls_space"
+            android:layout_centerVertical="true" />
+
+        <ImageButton
+            android:id="@+id/btnShuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/shuffle_bt"
+            android:background="@android:color/transparent"
+            android:layout_toRightOf="@id/btnStop"
+            android:layout_marginLeft="@dimen/controls_space"
+            android:layout_centerVertical="true" />
+
+        <ImageButton
+            android:id="@+id/btnShare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/iconocompartir"
+            android:background="@android:color/transparent"
+            android:layout_toRightOf="@id/btnShuffle"
+            android:layout_marginLeft="@dimen/controls_space"
+            android:layout_centerVertical="true" />
+
+        <ImageButton
+            android:id="@+id/btnRingtone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/iconoinfo"
+            android:background="@android:color/transparent"
+            android:layout_toRightOf="@id/btnShare"
+            android:layout_marginLeft="@dimen/controls_space"
+            android:layout_centerVertical="true" />
+
+    </RelativeLayout>
+    
+</RelativeLayout>
