@@ -3,6 +3,7 @@ package com.rudedroid.rudesoundboard.data;
 import java.io.Serializable;
 
 public class CustomSound implements Serializable {
+
 	private String title;
 	private String sound;
 	

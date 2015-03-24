@@ -1,4 +1,4 @@
-package rudedroid.com.rudesoundboard;
+package com.rudedroid.rudesoundboard;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
