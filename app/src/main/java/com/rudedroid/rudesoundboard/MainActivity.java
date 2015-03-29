@@ -1,20 +1,5 @@
 package com.rudedroid.rudesoundboard;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-
-import android.media.MediaPlayer;
-import android.media.RingtoneManager;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -24,9 +9,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,15 +36,26 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.inject.Inject;
 import com.rudedroid.rudesoundboard.data.CustomSound;
 import com.rudedroid.rudesoundboard.data.SoundboardManager;
 
-import roboguice.activity.RoboActivity;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import roboguice.activity.RoboActionBarActivity;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
 @ContentView(R.layout.activity_main)
-public class MainActivity extends RoboActivity {
+public class MainActivity extends RoboActionBarActivity {
+    @InjectView(R.id.toolbar)
+    private Toolbar toolbar;
     @InjectView(R.id.txtSoundTitle)
     private TextView txtSoundTitle;
     @InjectView(R.id.btnPlay)
@@ -63,9 +68,10 @@ public class MainActivity extends RoboActivity {
     private ImageButton btnShareSound;
     @InjectView(R.id.btnRingtone)
     private ImageButton btnRingtone;
+    @Inject
+    private LayoutInflater mInflater;
 
-    private SoundboardManager soundManager;
-    private Context mContext;
+    private List<CustomSound> soundList;
 
     //Manejo de los sonidos
     private int numBoton = -1;
@@ -75,7 +81,6 @@ public class MainActivity extends RoboActivity {
 
     //Menu lateral
     private BarneyAdapter adapter;
-    private LayoutInflater mInflater;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private LinearLayout mDrawerContainer;
@@ -85,56 +90,19 @@ public class MainActivity extends RoboActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mContext = this;
-        soundManager = SoundboardManager.getInstance(this);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
 
-        //Boton play
-        btnPlay.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                playSound();
-            }
-        });
+        btnPlay.setOnClickListener(playOnClick);
+        btnStop.setOnClickListener(stopOnClick);
+        btnShuffle.setOnClickListener(shuffleOnClick);
+        btnShareSound.setOnClickListener(shareOnClick);
+        btnRingtone.setOnClickListener(ringtoneOnClick);
 
-        //Boton stop
-        btnStop.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                stopSound();
-            }
-        });
-
-        //Boton shuffle
-        btnShuffle.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                shuffleSound();
-            }
-        });
-
-        //Boton compartir sonido
-        btnShareSound.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                shareSound();
-            }
-        });
-
-        //Boton establecer como tono del telefono
-        btnRingtone.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (numBoton != -1) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle(soundManager.soundsList.get(numBoton).getTitle());
-                    final String[] items = {getResources().getString(R.string.strRingTone), getResources().getString(R.string.strNotifTone)};
-
-                    builder.setItems(items, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int item) {
-                            setSoundAs(item);
-                        }
-                    });
-
-                    Dialog dialogAux = builder.create();
-                    dialogAux.show();
-                }
-            }
-        });
+        soundList = SoundboardManager.getSoundList();
 
         //Menu lateral
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -142,29 +110,28 @@ public class MainActivity extends RoboActivity {
         mDrawerList = (ListView) findViewById(R.id.menu_links);
 
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-
-        adapter = new BarneyAdapter(mContext);
+        adapter = new BarneyAdapter(this);
         mDrawerList.setAdapter(adapter);
-
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
-                R.string.drawer_open,  /* "open drawer" description for accessibility */
-                R.string.drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            public void onDrawerClosed(View view) {
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, 0, 0) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                supportInvalidateOptionsMenu();
             }
 
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                super.onDrawerStateChanged(newState);
+            }
+
+            @Override
             public void onDrawerOpened(View drawerView) {
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                super.onDrawerOpened(drawerView);
+                supportInvalidateOptionsMenu();
             }
         };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerLayout.openDrawer(mDrawerContainer);
     }
 
@@ -175,13 +142,64 @@ public class MainActivity extends RoboActivity {
     }
 
 
+    //OnClickListeners para los botones inferiores
+
+    private View.OnClickListener playOnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            playSound();
+        }
+    };
+
+    private View.OnClickListener stopOnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            stopSound();
+        }
+    };
+
+    private View.OnClickListener shuffleOnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            shuffleSound();
+        }
+    };
+
+    private View.OnClickListener shareOnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            shareSound();
+        }
+    };
+
+    private View.OnClickListener ringtoneOnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (numBoton != -1) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle(soundList.get(numBoton).getTitle());
+                final String[] items = {getResources().getString(R.string.strRingTone), getResources().getString(R.string.strNotifTone)};
+
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        setSoundAs(item);
+                    }
+                });
+
+                Dialog dialogAux = builder.create();
+                dialogAux.show();
+            }
+        }
+    };
+
+
     //Funciones de los botones del panel de control inferior\\
 
     //Funcion para reproducir un sonido
     public void playSound() {
         stopSound();
         if (numBoton != -1) {
-            mediaPlayer = MediaPlayer.create(MainActivity.this, getResources().getIdentifier(soundManager.soundsList.get(numBoton).getSound(), "raw", getPackageName()));
+            mediaPlayer = MediaPlayer.create(MainActivity.this, getResources().getIdentifier(soundList.get(numBoton).getSound(), "raw", getPackageName()));
             mediaPlayer.start();
             mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 
@@ -202,16 +220,14 @@ public class MainActivity extends RoboActivity {
 
     //Funcion para reproducir un sonido aleatorio
     public void shuffleSound() {
-        int numFrases = soundManager.soundsList.size();
+        int numFrases = soundList.size();
         int aux = (int) (Math.random() * numFrases);
 
         while (numBoton == aux) {
             aux = (int) (Math.random() * numFrases);
         }
 
-        txtSoundTitle.setText(soundManager.soundsList.get(aux).getTitle());
-        mDrawerList.setItemChecked(aux, true);
-
+        txtSoundTitle.setText(soundList.get(aux).getTitle());
         numBoton = aux;
         playSound();
     }
@@ -224,7 +240,7 @@ public class MainActivity extends RoboActivity {
             share.setType("audio/mp3");
             share.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.strShareSoundTitle));
             share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(aux));
-            startActivity(Intent.createChooser(share, getResources().getString(R.string.strShareSound) + " - " + soundManager.soundsList.get(numBoton).getTitle()));
+            startActivity(Intent.createChooser(share, getResources().getString(R.string.strShareSound) + " - " + soundList.get(numBoton).getTitle()));
         }
     }
 
@@ -234,7 +250,7 @@ public class MainActivity extends RoboActivity {
         if (aux != null) {
             ContentValues values = new ContentValues();
             values.put(MediaStore.MediaColumns.DATA, aux.getAbsolutePath());
-            values.put(MediaStore.MediaColumns.TITLE, soundManager.soundsList.get(numBoton).getSound());
+            values.put(MediaStore.MediaColumns.TITLE, soundList.get(numBoton).getSound());
             values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp3");
             values.put(MediaStore.Audio.Media.ARTIST, getResources().getString(R.string.title_activity_main));
             values.put(MediaStore.Audio.Media.IS_RINGTONE, true);
@@ -280,14 +296,14 @@ public class MainActivity extends RoboActivity {
                 editor.putInt("idLastNotification", numBoton);
                 break;
         }
-        editor.commit();
+        editor.apply();
     }
 
     //Funcion que comprueba si el archivo a enviar ya esta guardado en la memoria interna y si no es asi lo guarda
     public File createFileInStorage() {
         if (numBoton != -1) {
             path = setupExternalCacheDir();
-            filename = soundManager.soundsList.get(numBoton).getSound() + ".mp3";
+            filename = soundList.get(numBoton).getSound() + ".mp3";
             File aux = new File(path, filename);
             if (!aux.exists()) {
                 if (!savering(aux)) {
@@ -306,26 +322,30 @@ public class MainActivity extends RoboActivity {
     //Adapter de la lista de sonidos
     public class BarneyAdapter extends ArrayAdapter<CustomSound> {
         public BarneyAdapter(Context context) {
-            super(context, R.layout.drawer_list_item, soundManager.soundsList);
+            super(context, R.layout.drawer_list_item, soundList);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final int pos = position;
-            mInflater = LayoutInflater.from(getApplicationContext());
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.drawer_list_item, null);
             }
 
-            ((TextView) convertView).setText(soundManager.soundsList.get(position).getTitle());
+            ((TextView) convertView).setText(soundList.get(position).getTitle());
+
+            if (pos == numBoton) {
+                convertView.setBackgroundColor(getResources().getColor(R.color.primary));
+            } else {
+                convertView.setBackgroundColor(getResources().getColor(R.color.primary_dark));
+            }
+
             convertView.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    txtSoundTitle.setText(soundManager.soundsList.get(pos).getTitle());
-                    mDrawerList.setItemChecked(pos, true);
+                    txtSoundTitle.setText(soundList.get(pos).getTitle());
                     mDrawerLayout.closeDrawer(mDrawerContainer);
-
                     numBoton = pos;
                     playSound();
                 }
@@ -371,7 +391,7 @@ public class MainActivity extends RoboActivity {
         return true;
     }
 
-    //Para que muestre los iconos del menú :S
+    //Para que muestre los iconos del menú
     @Override
     public boolean onMenuOpened(int featureId, Menu menu) {
         if (featureId == Window.FEATURE_ACTION_BAR && menu != null) {
@@ -404,7 +424,7 @@ public class MainActivity extends RoboActivity {
     }
 
 
-    //Funciones llamadas desde las opciones del menu\\
+    //Funciones llamadas desde las opciones del menu
 
     //Funcion para contactar con RudeDroid
     private void contactUs() {
@@ -448,16 +468,16 @@ public class MainActivity extends RoboActivity {
     }
 
 
-    //Funciones para acceder a la memoria del telefono\\
+    //Funciones para acceder a la memoria del telefono
 
     //Funcion para guardar sonidos en la memoria interna o la tarjeta SD
     private boolean savering(File file) {
         if (numBoton == -1)
             return false;
 
-        byte[] buffer = null;
-        InputStream fIn = getBaseContext().getResources().openRawResource(getResources().getIdentifier(soundManager.soundsList.get(numBoton).getSound(), "raw", getPackageName()));
-        int size = 0;
+        byte[] buffer;
+        InputStream fIn = getBaseContext().getResources().openRawResource(getResources().getIdentifier(soundList.get(numBoton).getSound(), "raw", getPackageName()));
+        int size;
         try {
             size = fIn.available();
             buffer = new byte[size];
@@ -468,7 +488,9 @@ public class MainActivity extends RoboActivity {
         }
 
         boolean exists = path.exists();
-        if (!exists) path.mkdirs();
+        if (!exists) {
+            path.mkdirs();
+        }
 
         FileOutputStream save;
         try {

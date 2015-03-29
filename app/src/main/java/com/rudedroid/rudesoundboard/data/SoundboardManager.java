@@ -1,30 +1,23 @@
 package com.rudedroid.rudesoundboard.data;
 
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 
 import com.rudedroid.rudesoundboard.R;
+import com.rudedroid.rudesoundboard.util.XMLParser;
 
 public class SoundboardManager {
-	public ArrayList<CustomSound> soundsList;
-	
-	/** The INSTANCE. */
-	private static SoundboardManager INSTANCE = null;
+    private static List<CustomSound> soundList;
 
-	public SoundboardManager(Context c) {
-		XMLParser parser = new XMLParser();
-		InputStream index = c.getResources().openRawResource(R.raw.index);
-		soundsList = parser.Parse(index);
-		
-		INSTANCE = this;
-	}
+    public SoundboardManager(Context c) {
+        XMLParser parser = new XMLParser();
+        InputStream index = c.getResources().openRawResource(R.raw.index);
+        soundList = parser.Parse(index);
+    }
 
-	public static SoundboardManager getInstance(Context c) {
-		if(INSTANCE == null) {
-			new SoundboardManager(c);
-		}
-		return INSTANCE;
-	}
+    public static List<CustomSound> getSoundList() {
+        return soundList;
+    }
 }

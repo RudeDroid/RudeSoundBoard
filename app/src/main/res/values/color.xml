@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#3c321a</color>
+    <color name="primary_dark">#241f10</color>
     <color name="black">#000</color>
     <color name="white">#FFF</color>
     <color name="dark_grey">#464B52</color>
-    <color name="light_grey">#f8f8f8</color>
-    <color name="light_black">#464a51</color>
-    <color name="grey_button">#e3e3e3</color>
+    <color name="lightest_grey">#f8f8f8</color>
+    <color name="light_grey">#ffabacae</color>
     <color name="red">#b30000</color>
     <color name="blue">#0000ff</color>
+    <color name="light_blue">#00a0d4</color>
     <color name="green">#00e500</color>
     <color name="orange">#FBAF17</color>
-    <color name="gray_light">#ffabacae</color>
-    <color name="tab_title_underline_grey">#FFDADBDC</color>
-    <color name="grid_state_pressed">#BB7dbcd3</color>
-    <color name="grid_state_focused">#777dbcd3</color>
-    <color name="wet_asphalt">#34495e</color>
-    <color name="midnight_blue">#2c3e50</color>
-    <color name="emerald">#2ecc71</color>
-    <color name="pomegranate">#c0392b</color>
-    <color name="blue_app">#00a0d4</color>
-    <color name="app_main_color">#00a0d4</color>
 </resources>
